@@ -1,0 +1,385 @@
+/* ===== Colours and basics ===== */
+:root {
+  --blue: #2563eb;
+  --blue-dark: #1d4ed8;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --bg: #f5f7fb;
+  --card: #ffffff;
+  --border: #e5e7eb;
+  --red: #b91c1c;
+  --green: #15803d;
+  --amber: #b45309;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  background: var(--bg);
+  color: var(--text);
+}
+
+body.centered {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+main {
+  max-width: 960px;
+  margin: 1.5rem auto;
+  padding: 0 1rem;
+}
+
+h1 { font-size: 1.6rem; margin: 0.25rem 0 0.5rem; }
+h2 { font-size: 1.35rem; margin: 0.25rem 0 0.75rem; }
+h3 { font-size: 1.1rem; margin: 0.25rem 0; }
+
+.muted,
+.subtitle {
+  color: var(--muted);
+}
+
+/* ===== Top bar (every page except login and display) ===== */
+header.topbar {
+  background: var(--blue);
+  color: #ffffff;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+header.topbar nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+header.topbar a {
+  color: #ffffff;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 1.2rem;
+  text-decoration: none;
+}
+
+/* ===== Cards and layout ===== */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+.stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.staff-layout {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 720px) {
+  .staff-layout {
+    grid-template-columns: 1fr 1.4fr;
+  }
+}
+
+/* ===== Forms ===== */
+label {
+  display: block;
+  font-weight: 600;
+  margin: 0.75rem 0;
+}
+
+input,
+select {
+  display: block;
+  width: 100%;
+  margin-top: 0.35rem;
+  padding: 0.7rem;
+  font-size: 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+select {
+  width: auto;
+  min-width: 220px;
+}
+
+input:focus,
+select:focus,
+button:focus {
+  outline: 3px solid #bfdbfe;
+  outline-offset: 1px;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.tab {
+  flex: 1;
+  padding: 0.6rem;
+  font-size: 1rem;
+  border: 1px solid var(--border);
+  background: #f9fafb;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.tab.active {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #ffffff;
+}
+
+/* ===== Buttons ===== */
+.btn {
+  display: inline-block;
+  padding: 0.65rem 1.1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--blue);
+  color: #ffffff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--blue-dark);
+}
+
+.btn-danger {
+  background: #fee2e2;
+  color: var(--red);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #fecaca;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.btn-small {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.9rem;
+}
+
+.btn-block {
+  display: block;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+/* ===== Messages ===== */
+.message {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin: 1rem 0 0;
+}
+
+.message.info {
+  background: #eff6ff;
+  color: #1e40af;
+}
+
+.message.success {
+  background: #dcfce7;
+  color: var(--green);
+}
+
+.message.error {
+  background: #fee2e2;
+  color: var(--red);
+}
+
+/* ===== Status badges (same colours everywhere) ===== */
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.badge-waiting {
+  background: #fef3c7;
+  color: var(--amber);
+}
+
+.badge-called {
+  background: #dcfce7;
+  color: var(--green);
+}
+
+.badge-completed {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.badge-absent,
+.badge-cancelled {
+  background: #fee2e2;
+  color: var(--red);
+}
+
+/* ===== Patient token cards ===== */
+.token-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0.25rem 0;
+}
+
+.banner-turn {
+  background: #dcfce7;
+  color: var(--green);
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-weight: 700;
+  margin: 0.75rem 0;
+}
+
+/* ===== Staff tables ===== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.6rem 0.4rem;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.serving-number {
+  font-size: 4rem;
+  font-weight: 800;
+  color: var(--blue);
+  line-height: 1.1;
+}
+
+/* ===== Public display (waiting-room screen) ===== */
+.display-page {
+  background: #0f172a;
+  color: #ffffff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.display-page .eyebrow {
+  font-size: 1.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #93c5fd;
+  margin: 1rem 0 0.25rem;
+}
+
+.display-page .now {
+  font-size: clamp(7rem, 28vw, 20rem);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.display-page .waiting-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.display-page .chip {
+  background: #1e293b;
+  padding: 0.6rem 1.1rem;
+  border-radius: 999px;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.display-page .updated {
+  color: #64748b;
+  margin-top: 2rem;
+}
+
+.display-page .message {
+  max-width: 600px;
+}
