@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QueueLess: Staff dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="staff.html">QueueLess Staff</a>
+    <nav>
+      <button type="button" id="logout-button" class="btn btn-ghost btn-small">Sign out</button>
+    </nav>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <div>
+        <h2>Staff dashboard</h2>
+        <p class="muted">Updates automatically every 5 seconds.</p>
+      </div>
+      <label>Department
+        <select id="queue-select"></select>
+      </label>
+    </div>
+
+    <p id="message" class="message" hidden></p>
+
+    <div class="staff-layout">
+      <section class="card">
+        <h3>Now serving</h3>
+        <div id="serving-number" class="serving-number">—</div>
+        <p id="serving-name" class="muted">No one is being served</p>
+        <div class="button-row">
+          <button type="button" id="call-next" class="btn btn-primary">Call next</button>
+          <button type="button" id="complete" class="btn btn-primary" disabled>Complete</button>
+          <button type="button" id="absent-serving" class="btn btn-danger" disabled>Mark absent</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h3>Waiting (<span id="waiting-count">0</span>)</h3>
+        <table>
+          <thead>
+            <tr><th>Token</th><th>Patient</th><th></th></tr>
+          </thead>
+          <tbody id="waiting-body"></tbody>
+        </table>
+        <p id="waiting-empty" class="muted" hidden>Nobody is waiting.</p>
+      </section>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    const queueSelect = document.getElementById("queue-select");
+    const message = document.getElementById("message");
+    const servingNumber = document.getElementById("serving-number");
+    const servingName = document.getElementById("serving-name");
+    const callNextBtn = document.getElementById("call-next");
+    const completeBtn = document.getElementById("complete");
+    const absentServingBtn = document.getElementById("absent-serving");
+    const waitingBody = document.getElementById("waiting-body");
+    const waitingEmpty = document.getElementById("waiting-empty");
+    const waitingCount = document.getElementById("waiting-count");
+
+    let servingToken = null;
+
+    async function loadQueues() {
+      const queues = await api("/api/queues");
+      queueSelect.innerHTML = "";
+      queues.forEach((queue) => {
+        const option = el("option", "", queue.name);
+        option.value = queue.id;
+        queueSelect.appendChild(option);
+      });
+      const fromUrl = new URLSearchParams(window.location.search).get("queue");
+      if (fromUrl) {
+        queueSelect.value = fromUrl;
+      }
+    }
+
+    function renderView(view) {
+      servingToken = view.serving;
+      if (view.serving) {
+        servingNumber.textContent = "#" + view.serving.tokenNumber;
+        servingName.textContent = view.serving.patientName;
+      } else {
+        servingNumber.textContent = "—";
+        servingName.textContent = "No one is being served";
+      }
+      completeBtn.disabled = !view.serving;
+      absentServingBtn.disabled = !view.serving;
+
+      waitingBody.innerHTML = "";
+      waitingCount.textContent = String(view.waiting.length);
+      waitingEmpty.hidden = view.waiting.length > 0;
+
+      view.waiting.forEach((token) => {
+        const row = document.createElement("tr");
+        row.appendChild(el("td", "", "#" + token.tokenNumber));
+        row.appendChild(el("td", "", token.patientName));
+
+        const actionCell = document.createElement("td");
+        const absentBtn = el("button", "btn btn-danger btn-small", "Mark absent");
+        absentBtn.type = "button";
+        absentBtn.addEventListener("click", () => {
+          if (!confirm("Mark token #" + token.tokenNumber + " as absent?")) {
+            return;
+          }
+          staffAction(
+            "/api/staff/tokens/" + token.id + "/absent",
+            (result) => "Token #" + result.tokenNumber + " marked absent."
+          );
+        });
+        actionCell.appendChild(absentBtn);
+        row.appendChild(actionCell);
+
+        waitingBody.appendChild(row);
+      });
+    }
+
+    async function refresh() {
+      if (!queueSelect.value) {
+        return;
+      }
+      try {
+        renderView(await api("/api/staff/queues/" + queueSelect.value));
+      } catch (err) {
+        showMessage(message, err.message, "error");
+      }
+    }
+
+    // Runs a staff action, shows the result, then reloads the view.
+    async function staffAction(path, describe) {
+      try {
+        const result = await api(path, { method: "POST" });
+        showMessage(message, describe(result), "success");
+      } catch (err) {
+        showMessage(message, err.message, "error");
+      }
+      await refresh();
+    }
+
+    callNextBtn.addEventListener("click", () =>
+      staffAction(
+        "/api/staff/queues/" + queueSelect.value + "/call-next",
+        (result) => "Called token #" + result.tokenNumber + " (" + result.patientName + ")."
+      )
+    );
+
+    completeBtn.addEventListener("click", () => {
+      if (!servingToken) {
+        return;
+      }
+      staffAction(
+        "/api/staff/tokens/" + servingToken.id + "/complete",
+        (result) => "Token #" + result.tokenNumber + " completed."
+      );
+    });
+
+    absentServingBtn.addEventListener("click", () => {
+      if (!servingToken) {
+        return;
+      }
+      if (!confirm("Mark token #" + servingToken.tokenNumber + " as absent?")) {
+        return;
+      }
+      staffAction(
+        "/api/staff/tokens/" + servingToken.id + "/absent",
+        (result) => "Token #" + result.tokenNumber + " marked absent."
+      );
+    });
+
+    async function init() {
+      try {
+        await requireLogin("STAFF");
+        await loadQueues();
+      } catch (err) {
+        showMessage(message, err.message, "error");
+        return;
+      }
+      queueSelect.addEventListener("change", refresh);
+      await refresh();
+      setInterval(refresh, 5000);
+    }
+
+    document.getElementById("logout-button").addEventListener("click", logout);
+    init();
+  </script>
+</body>
+</html>
