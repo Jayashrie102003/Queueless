@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QueueLess: My tokens</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html">QueueLess</a>
+    <nav>
+      <a href="index.html">Choose a department</a>
+      <button type="button" id="logout-button" class="btn btn-ghost btn-small">Sign out</button>
+    </nav>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <div>
+        <h2>My tokens</h2>
+        <p class="muted">Updates automatically every 5 seconds.</p>
+      </div>
+    </div>
+
+    <p id="message" class="message" hidden></p>
+
+    <section id="tokens" class="stack"></section>
+
+    <section id="empty" class="card" hidden>
+      <h3>You are not in any queue</h3>
+      <p class="muted">Choose a department to join its queue.</p>
+      <a class="btn btn-primary" href="index.html">Choose a department</a>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    const tokensEl = document.getElementById("tokens");
+    const emptyEl = document.getElementById("empty");
+    const message = document.getElementById("message");
+
+    function renderTokens(tokens) {
+      tokensEl.innerHTML = "";
+      emptyEl.hidden = tokens.length > 0;
+
+      tokens.forEach((token) => {
+        const card = el("article", "card");
+
+        const header = el("div", "toolbar");
+        header.appendChild(el("h3", "", token.queueName));
+        header.appendChild(statusBadge(token.status));
+        card.appendChild(header);
+
+        card.appendChild(el("div", "token-number", "#" + token.tokenNumber));
+        card.appendChild(el("p", "muted", "Your token number"));
+
+        if (token.status === "CALLED") {
+          card.appendChild(el("div", "banner-turn", "It's your turn. Please go to the counter."));
+        } else if (token.peopleAhead === 0) {
+          card.appendChild(el("p", "", "You're next in line."));
+        } else {
+          card.appendChild(el("p", "", "People ahead of you: " + token.peopleAhead));
+          card.appendChild(el("p", "", "Estimated wait: about " + token.estimatedWaitMinutes + " minutes"));
+        }
+
+        if (token.status === "WAITING") {
+          const leave = el("button", "btn btn-danger", "Leave queue");
+          leave.type = "button";
+          leave.addEventListener("click", () => leaveQueue(token.id));
+          card.appendChild(leave);
+        }
+
+        tokensEl.appendChild(card);
+      });
+    }
+
+    async function refresh() {
+      try {
+        renderTokens(await api("/api/tokens/me"));
+      } catch (err) {
+        showMessage(message, err.message, "error");
+      }
+    }
+
+    async function leaveQueue(tokenId) {
+      if (!confirm("Leave this queue? You will lose your place.")) {
+        return;
+      }
+      try {
+        await api("/api/tokens/" + tokenId + "/leave", { method: "POST" });
+        showMessage(message, "You have left the queue.", "success");
+        await refresh();
+      } catch (err) {
+        showMessage(message, err.message, "error");
+      }
+    }
+
+    async function init() {
+      try {
+        await requireLogin("PATIENT");
+      } catch (err) {
+        showMessage(message, err.message, "error");
+        return;
+      }
+      await refresh();
+      setInterval(refresh, 5000);
+    }
+
+    document.getElementById("logout-button").addEventListener("click", logout);
+    init();
+  </script>
+</body>
+</html>
