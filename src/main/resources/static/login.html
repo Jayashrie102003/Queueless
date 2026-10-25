@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QueueLess: Sign in</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="centered">
+  <main class="card auth-card">
+    <h1>QueueLess</h1>
+    <p class="subtitle">Sign in, or create a patient account.</p>
+
+    <div class="tabs">
+      <button type="button" id="tab-login" class="tab active">Sign in</button>
+      <button type="button" id="tab-register" class="tab">Register</button>
+    </div>
+
+    <form id="login-form">
+      <label>Email
+        <input type="email" id="login-email" required autocomplete="username">
+      </label>
+      <label>Password
+        <input type="password" id="login-password" required autocomplete="current-password">
+      </label>
+      <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+    </form>
+
+    <form id="register-form" hidden>
+      <label>Full name
+        <input type="text" id="register-name" required maxlength="100">
+      </label>
+      <label>Email
+        <input type="email" id="register-email" required>
+      </label>
+      <label>Password (at least 6 characters)
+        <input type="password" id="register-password" required minlength="6" autocomplete="new-password">
+      </label>
+      <button type="submit" class="btn btn-primary btn-block">Create account</button>
+    </form>
+
+    <p id="message" class="message" hidden></p>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    const loginForm = document.getElementById("login-form");
+    const registerForm = document.getElementById("register-form");
+    const tabLogin = document.getElementById("tab-login");
+    const tabRegister = document.getElementById("tab-register");
+    const message = document.getElementById("message");
+
+    function showTab(tab) {
+      const onLogin = tab === "login";
+      loginForm.hidden = !onLogin;
+      registerForm.hidden = onLogin;
+      tabLogin.classList.toggle("active", onLogin);
+      tabRegister.classList.toggle("active", !onLogin);
+      showMessage(message, "");
+    }
+
+    function goHome(role) {
+      window.location.href = role === "STAFF" ? "staff.html" : "index.html";
+    }
+
+    async function signIn(email, password) {
+      const user = await api("/api/auth/login", {
+        method: "POST",
+        body: { email: email, password: password },
+        redirectOn401: false,
+      });
+      goHome(user.role);
+    }
+
+    tabLogin.addEventListener("click", () => showTab("login"));
+    tabRegister.addEventListener("click", () => showTab("register"));
+
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      showMessage(message, "Signing in...", "info");
+      try {
+        await signIn(
+          document.getElementById("login-email").value.trim(),
+          document.getElementById("login-password").value
+        );
+      } catch (err) {
+        showMessage(message, err.message, "error");
+      }
+    });
+
+    registerForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const name = document.getElementById("register-name").value.trim();
+      const email = document.getElementById("register-email").value.trim();
+      const password = document.getElementById("register-password").value;
+      showMessage(message, "Creating your account...", "info");
+      try {
+        await api("/api/auth/register", {
+          method: "POST",
+          body: { name: name, email: email, password: password },
+          redirectOn401: false,
+        });
+        await signIn(email, password);
+      } catch (err) {
+        showMessage(message, err.message, "error");
+      }
+    });
+
+    // Already signed in? Skip this page and go to the right home page.
+    api("/api/auth/me", { redirectOn401: false })
+      .then((me) => goHome(me.role))
+      .catch(() => {});
+  </script>
+</body>
+</html>

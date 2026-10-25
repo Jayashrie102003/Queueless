@@ -3,9 +3,76 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>QueueLess</title>
+  <title>QueueLess: Choose a department</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>QueueLess is running</h1>
+  <header class="topbar">
+    <a class="brand" href="index.html">QueueLess</a>
+    <nav>
+      <a href="patient.html">My tokens</a>
+      <button type="button" id="logout-button" class="btn btn-ghost btn-small">Sign out</button>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Choose a department</h2>
+    <p class="muted">Join a queue, and we'll show your token number and estimated wait.</p>
+
+    <p id="message" class="message" hidden></p>
+
+    <section id="queues" class="grid"></section>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    const queuesEl = document.getElementById("queues");
+    const message = document.getElementById("message");
+
+    function renderQueues(queues) {
+      queuesEl.innerHTML = "";
+      if (queues.length === 0) {
+        queuesEl.appendChild(el("p", "muted", "No departments are open right now."));
+        return;
+      }
+      queues.forEach((queue) => {
+        const card = el("article", "card");
+        card.appendChild(el("h3", "", queue.name));
+        card.appendChild(el("p", "muted", "About " + queue.averageServiceMinutes + " minutes per patient"));
+
+        const button = el("button", "btn btn-primary btn-block", "Join queue");
+        button.type = "button";
+        button.addEventListener("click", () => joinQueue(queue.id, button));
+        card.appendChild(button);
+
+        queuesEl.appendChild(card);
+      });
+    }
+
+    async function joinQueue(queueId, button) {
+      button.disabled = true;
+      button.textContent = "Joining...";
+      try {
+        await api("/api/queues/" + queueId + "/join", { method: "POST" });
+        window.location.href = "patient.html";
+      } catch (err) {
+        showMessage(message, err.message, "error");
+        button.disabled = false;
+        button.textContent = "Join queue";
+      }
+    }
+
+    async function init() {
+      try {
+        await requireLogin("PATIENT");
+        renderQueues(await api("/api/queues"));
+      } catch (err) {
+        showMessage(message, err.message, "error");
+      }
+    }
+
+    document.getElementById("logout-button").addEventListener("click", logout);
+    init();
+  </script>
 </body>
 </html>
