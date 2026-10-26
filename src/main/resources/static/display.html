@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QueueLess: Now serving</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="display-page">
+  <p id="queue-name" class="eyebrow">QueueLess</p>
+  <p class="eyebrow">Now serving</p>
+  <div id="now-serving" class="now">-</div>
+
+  <p class="eyebrow">Waiting</p>
+  <div id="waiting" class="waiting-chips"></div>
+  <p id="waiting-empty" class="updated" hidden>Nobody is waiting</p>
+
+  <p id="message" class="message" hidden></p>
+  <p id="updated" class="updated"></p>
+
+  <script src="app.js"></script>
+  <script>
+    const queueId = new URLSearchParams(window.location.search).get("queue") || "1";
+
+    const queueNameEl = document.getElementById("queue-name");
+    const nowEl = document.getElementById("now-serving");
+    const waitingEl = document.getElementById("waiting");
+    const waitingEmpty = document.getElementById("waiting-empty");
+    const updatedEl = document.getElementById("updated");
+    const message = document.getElementById("message");
+
+    async function refresh() {
+      try {
+        const data = await api("/api/display/queues/" + queueId, { redirectOn401: false });
+
+        queueNameEl.textContent = data.queueName;
+        nowEl.textContent = data.nowServing === null ? "-" : "#" + data.nowServing;
+
+        waitingEl.innerHTML = "";
+        data.waiting.forEach((number) => {
+          waitingEl.appendChild(el("span", "chip", "#" + number));
+        });
+        waitingEmpty.hidden = data.waiting.length > 0;
+
+        updatedEl.textContent = "Updated " + new Date().toLocaleTimeString();
+        showMessage(message, "");
+      } catch (err) {
+        showMessage(message, "Could not load the queue. Retrying...", "error");
+      }
+    }
+
+    refresh();
+    setInterval(refresh, 5000);
+  </script>
+</body>
+</html>
