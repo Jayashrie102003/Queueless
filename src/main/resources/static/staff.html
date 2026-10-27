@@ -30,7 +30,7 @@
     <div class="staff-layout">
       <section class="card">
         <h3>Now serving</h3>
-        <div id="serving-number" class="serving-number">—</div>
+        <div id="serving-number" class="serving-number">-</div>
         <p id="serving-name" class="muted">No one is being served</p>
         <div class="button-row">
           <button type="button" id="call-next" class="btn btn-primary">Call next</button>
@@ -87,7 +87,7 @@
         servingNumber.textContent = "#" + view.serving.tokenNumber;
         servingName.textContent = view.serving.patientName;
       } else {
-        servingNumber.textContent = "—";
+        servingNumber.textContent = "-";
         servingName.textContent = "No one is being served";
       }
       completeBtn.disabled = !view.serving;
@@ -132,13 +132,22 @@
       }
     }
 
-    // Runs a staff action, shows the result, then reloads the view.
+    // Runs a staff action once, shows the result, then reloads the view.
+    // While one action is running, further clicks are ignored.
+    let actionRunning = false;
+
     async function staffAction(path, describe) {
+      if (actionRunning) {
+        return;
+      }
+      actionRunning = true;
       try {
         const result = await api(path, { method: "POST" });
         showMessage(message, describe(result), "success");
       } catch (err) {
         showMessage(message, err.message, "error");
+      } finally {
+        actionRunning = false;
       }
       await refresh();
     }
