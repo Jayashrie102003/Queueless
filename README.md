@@ -14,11 +14,11 @@ Built as a full-stack portfolio project: **Java 21, Spring Boot 4.1.1, MySQL, pl
 
 ## Screenshots
 
-![Sign in](docs/screenshots/login.png)
-![Choose a department](docs/screenshots/index.png)
-![Patient token card](docs/screenshots/patient.png)
-![Staff dashboard](docs/screenshots/staff.png)
-![Public display](docs/screenshots/display.png)
+<p><img src="docs/screenshots/login.png" alt="Sign in" width="700"></p>
+<p><img src="docs/screenshots/index.png" alt="Choose a department" width="700"></p>
+<p><img src="docs/screenshots/patient.png" alt="Patient token card" width="700"></p>
+<p><img src="docs/screenshots/staff.png" alt="Staff dashboard" width="700"></p>
+<p><img src="docs/screenshots/display.png" alt="Public display" width="700"></p>
 
 ## Technology
 
