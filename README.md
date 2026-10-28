@@ -14,12 +14,11 @@ Built as a full-stack portfolio project: **Java 21, Spring Boot 4.1.1, MySQL, pl
 
 ## Screenshots
 
-*(Add these after you take them. Save them in `docs/screenshots/` and link them here.)*
-
-- `docs/screenshots/login.png`: sign in and register
-- `docs/screenshots/patient.png`: patient token card
-- `docs/screenshots/staff.png`: staff dashboard
-- `docs/screenshots/display.png`: public now-serving screen
+![Sign in](docs/screenshots/login.png)
+![Choose a department](docs/screenshots/index.png)
+![Patient token card](docs/screenshots/patient.png)
+![Staff dashboard](docs/screenshots/staff.png)
+![Public display](docs/screenshots/display.png)
 
 ## Technology
 
