@@ -185,6 +185,11 @@ This is a learning project and a working prototype, not a production system.
 - **Live updates use polling** every 5 seconds, not WebSockets.
 - **Test passwords are weak** (`secret123`, `Staff@123`). They are for local testing only.
 
+## Scope
+
+QueueLess v1 is a working prototype that shows: full-stack request handling, relational database design with constraints, 
+row locking for concurrent token allocation, session-based role checks, and automated tests including a 50-user concurrency test. It is not production-ready. See "Known limitations" above for what is missing.
+
 ## Future work
 
 - JWT or database-backed session authentication
